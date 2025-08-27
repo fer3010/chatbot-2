@@ -1,18 +1,30 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Chatbot Flask</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <meta charset="UTF-8">
+    <title>Chat Bot fer30</title>
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-  <div class="chat-container">
-    <div id="chat-box" class="chat-box"></div>
-    <div class="input-area">
-      <input type="text" id="user-input" placeholder="Escribe tu mensaje..." />
-      <button onclick="sendMessage()">Enviar</button>
+    <div class="container">
+        <h1>🤖 Chat Bot fer30</h1>
+        <form method="POST">
+            <input type="text" name="user_input" placeholder="Escribe tu mensaje..." required>
+            <button type="submit">Enviar</button>
+        </form>
+
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+
+        <div class="chat-box">
+            {% for message in chat_history %}
+                <div class="message {{ message.role }}">
+                    <strong>{{ message.role.capitalize() }}:</strong>
+                    {{ message.parts[0].text }}
+                </div>
+            {% endfor %}
+        </div>
     </div>
-  </div>
-  <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
 </body>
 </html>
