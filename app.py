@@ -52,5 +52,5 @@ def home():
                 error = f"Ocurrió un error: {e}"
     return render_template("index.html", chat_history=chat.history if chat else [], error=error)
 
-if __name__ == "_main_":
+if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
