@@ -1,7 +1,23 @@
 {
-  "hola": "¡Hola! ¿Cómo estás?",
-  "quién eres": "Soy el Chat Bot de fer30.",
-  "adiós": "¡Hasta luego!",
-  "gracias": "¡De nada!",
-  "cómo estás": "Estoy aquí para ayudarte, ¿en qué te puedo servir?"
+  "saludos": {
+    "hola": "¡Hola! ¿Cómo estás hoy?",
+    "buenos_días": "¡Buenos días! ¿En qué puedo ayudarte?",
+    "buenas_tardes": "¡Buenas tardes! ¿Qué tal tu día?",
+    "buenas_noches": "¡Buenas noches! ¿Listo para relajarte?"
+  },
+  "despedidas": {
+    "adiós": "¡Hasta luego! Que tengas un gran día.",
+    "nos_vemos": "¡Nos vemos pronto!",
+    "chau": "¡Chau! Cuídate mucho."
+  },
+  "emociones": {
+    "triste": "Lamento que te sientas así. ¿Quieres hablar de ello?",
+    "feliz": "¡Me alegra mucho escuchar eso!",
+    "estresado": "Respira profundo. Estoy aquí para ayudarte."
+  },
+  "ayuda": {
+    "no_se": "No te preocupes, vamos a resolverlo juntos.",
+    "necesito_ayuda": "Claro, dime qué necesitas y lo vemos paso a paso.",
+    "problema": "Cuéntame más sobre el problema para poder ayudarte mejor."
+  }
 }
