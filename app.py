@@ -1,24 +1,35 @@
 import google.generativeai as genai
 from flask import Flask, request, jsonify, render_template
+import time
 
 # Configura tu clave API
 genai.configure(api_key="AIzaSyD2e0XcC7ZzEsX3oMTzTT8roY62CjqLtt4")
 
-# Crea el modelo Gemini 1.5 Pro
-model = genai.GenerativeModel("gemini-1.5-pro")
-
-# Crea una sesión de chat (requerido para Gemini 1.5)
-chat_session = model.start_chat(history=[])
+# Usa el modelo gemini-pro (más estable en el plan gratuito)
+model = genai.GenerativeModel("gemini-pro")
 
 app = Flask(__name__)
 
+# Función principal para generar respuesta
 def get_ai_response(user_message):
     try:
-        response = chat_session.send_message(user_message)
+        response = model.generate_content(user_message)
         return response.text.strip()
+    except genai.types.RateLimitError as e:
+        print("⚠️ Límite de cuota alcanzado. Esperando 60 segundos...")
+        time.sleep(60)
+        return "Has alcanzado el límite de uso. Intenta de nuevo en un momento."
     except Exception as e:
-        print(f"Error al generar contenido con Gemini 1.5 Pro: {e}")
-        return "Hubo un problema al generar la respuesta con Gemini 1.5 Pro."
+        print(f"Error al generar contenido con Gemini: {e}")
+        return "Hubo un problema al generar la respuesta con Gemini."
+
+# ✅ Función para verificar si la API está funcionando
+def test_gemini_api():
+    try:
+        response = model.generate_content("Hola, ¿estás funcionando?")
+        return True, response.text.strip()
+    except Exception as e:
+        return False, str(e)
 
 @app.route('/')
 def index():
@@ -32,6 +43,15 @@ def get_response():
     
     ai_response = get_ai_response(user_message)
     return jsonify({'response': ai_response})
+
+# Ruta para probar la API
+@app.route('/test_api')
+def test_api():
+    ok, result = test_gemini_api()
+    return jsonify({
+        'status': 'ok' if ok else 'error',
+        'message': result
+    })
 
 if __name__ == '__main__':
     app.run(debug=True)
