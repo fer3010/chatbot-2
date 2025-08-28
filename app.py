@@ -1,21 +1,24 @@
 import google.generativeai as genai
 from flask import Flask, request, jsonify, render_template
 
-# Configura tu clave API de Gemini
+# Configura tu clave API
 genai.configure(api_key="AIzaSyD2e0XcC7ZzEsX3oMTzTT8roY62CjqLtt4")
 
-# Inicializa el modelo Gemini Pro
-model = genai.GenerativeModel("gemini-pro")
+# Crea el modelo Gemini 1.5 Pro
+model = genai.GenerativeModel("gemini-1.5-pro")
+
+# Crea una sesión de chat (requerido para Gemini 1.5)
+chat_session = model.start_chat(history=[])
 
 app = Flask(__name__)
 
 def get_ai_response(user_message):
     try:
-        response = model.generate_content(user_message)
+        response = chat_session.send_message(user_message)
         return response.text.strip()
     except Exception as e:
-        print(f"Error al generar contenido con Gemini: {e}")
-        return "Hubo un problema al generar la respuesta con Gemini."
+        print(f"Error al generar contenido con Gemini 1.5 Pro: {e}")
+        return "Hubo un problema al generar la respuesta con Gemini 1.5 Pro."
 
 @app.route('/')
 def index():
