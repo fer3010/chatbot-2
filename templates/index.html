@@ -1,31 +1,27 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Chat con Gemini</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <script>
-    async function enviarMensaje() {
-      const mensaje = document.getElementById("mensaje").value;
-      const respuestaDiv = document.getElementById("respuesta");
-
-      const res = await fetch("/get_response", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: mensaje })
-      });
-
-      const data = await res.json();
-      respuestaDiv.innerText = data.response;
-    }
-  </script>
+    <title>Gemini Chat</title>
 </head>
 <body>
-  <div class="chat-container">
-    <h1>💬 Chat con Gemini</h1>
-    <input type="text" id="mensaje" placeholder="Escribe tu mensaje aquí...">
-    <button onclick="enviarMensaje()">Enviar</button>
-    <div id="respuesta"></div>
-  </div>
+    <h1>Gemini Chat</h1>
+    <input type="text" id="userMessage" placeholder="Escribe tu mensaje">
+    <button onclick="sendMessage()">Enviar</button>
+    <p id="response"></p>
+
+    <script>
+        function sendMessage() {
+            const message = document.getElementById("userMessage").value;
+            fetch("/get_response", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message })
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("response").innerText = data.response;
+            });
+        }
+    </script>
 </body>
 </html>
