@@ -1,35 +1,34 @@
 import google.generativeai as genai
 from flask import Flask, request, jsonify, render_template
-import time
 
-# Configura tu clave API
-genai.configure(api_key="AIzaSyD2e0XcC7ZzEsX3oMTzTT8roY62CjqLtt4")
+# Configura tu nueva clave API gratuita
+genai.configure(api_key="AIzaSyBeLRZD1gELs7K66drGWiL0eG3Ftokw2Ss")
 
-# Usa el modelo gemini-pro (más estable en el plan gratuito)
+# Usa el modelo gemini-pro (versión 1.0, compatible con generate_content)
 model = genai.GenerativeModel("gemini-pro")
 
 app = Flask(__name__)
 
-# Función principal para generar respuesta
-def get_ai_response(user_message):
+# Verifica si la API está disponible
+def is_api_available():
     try:
-        response = model.generate_content(user_message)
-        return response.text.strip()
-    except genai.types.RateLimitError as e:
-        print("⚠️ Límite de cuota alcanzado. Esperando 60 segundos...")
-        time.sleep(60)
-        return "Has alcanzado el límite de uso. Intenta de nuevo en un momento."
-    except Exception as e:
-        print(f"Error al generar contenido con Gemini: {e}")
-        return "Hubo un problema al generar la respuesta con Gemini."
-
-# ✅ Función para verificar si la API está funcionando
-def test_gemini_api():
-    try:
-        response = model.generate_content("Hola, ¿estás funcionando?")
+        response = model.generate_content("¿Estás disponible?")
         return True, response.text.strip()
     except Exception as e:
         return False, str(e)
+
+# Genera respuesta con control de longitud
+def get_ai_response(user_message):
+    try:
+        # Limita el mensaje si es muy largo (ej. 1000 caracteres)
+        if len(user_message) > 1000:
+            user_message = user_message[:1000]
+
+        response = model.generate_content(user_message)
+        return response.text.strip()
+    except Exception as e:
+        print(f"Error al generar contenido con Gemini: {e}")
+        return "Hubo un problema al generar la respuesta con Gemini. Intenta más tarde."
 
 @app.route('/')
 def index():
@@ -40,17 +39,20 @@ def get_response():
     user_message = request.json.get('message')
     if not user_message:
         return jsonify({'response': 'Mensaje vacío.'})
-    
+
+    disponible, estado = is_api_available()
+    if not disponible:
+        return jsonify({'response': f"La API no está disponible: {estado}"})
+
     ai_response = get_ai_response(user_message)
     return jsonify({'response': ai_response})
 
-# Ruta para probar la API
 @app.route('/test_api')
 def test_api():
-    ok, result = test_gemini_api()
+    disponible, estado = is_api_available()
     return jsonify({
-        'status': 'ok' if ok else 'error',
-        'message': result
+        'status': 'ok' if disponible else 'error',
+        'message': estado
     })
 
 if __name__ == '__main__':
