@@ -6,7 +6,7 @@ from flask import Flask, request, jsonify, render_template
 API_KEY = "AIzaSyD2e0XcC7ZzEsX3oMTzTT8roY62CjqLtt4"
 API_URL = "https://api.openai.com/v1/chat/completions"
 
-app = Flask(_name_)
+app = Flask(__name__)
 
 def get_ai_response(user_message):
     headers = {
