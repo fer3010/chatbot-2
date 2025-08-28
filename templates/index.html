@@ -1,22 +1,64 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Chatbot Gemini</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Chatbot con IA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-  <div class="container">
-    <h1>💬 Chat con Gemini 1.5 Pro</h1>
-    <form method="post">
-      <input type="text" name="user_input" placeholder="Escribe tu mensaje..." required>
-      <button type="submit">Enviar</button>
-    </form>
-    {% if response %}
-      <div class="response">
-        <strong>Gemini:</strong> {{ response }}
-      </div>
-    {% endif %}
-  </div>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h3>🤖 Chatbot con IA</h3>
+        </div>
+        <div class="chat-box" id="chat-box">
+            </div>
+        <form id="chat-form">
+            <input type="text" id="user-input" placeholder="Escribe tu mensaje..." autocomplete="off">
+            <button type="submit">Enviar</button>
+        </form>
+    </div>
+
+    <script>
+        const chatForm = document.getElementById('chat-form');
+        const userInput = document.getElementById('user-input');
+        const chatBox = document.getElementById('chat-box');
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userMessage = userInput.value.trim();
+
+            if (userMessage === '') {
+                return;
+            }
+
+            appendMessage(userMessage, 'user');
+            userInput.value = '';
+
+            try {
+                const response = await fetch('/get_response', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: userMessage }),
+                });
+
+                const data = await response.json();
+                appendMessage(data.response, 'ai');
+            } catch (error) {
+                console.error('Error:', error);
+                appendMessage('Lo siento, hubo un error al obtener la respuesta.', 'ai');
+            }
+        });
+
+        function appendMessage(message, sender) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', ${sender}-message);
+            messageElement.textContent = message;
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    </script>
 </body>
 </html>

@@ -1,45 +1,47 @@
-from flask import Flask, request, render_template
-import google.generativeai as genai
-import json
+import os
+import requests
+from flask import Flask, request, jsonify, render_template
 
-# Configura tu API key
-genai.configure(api_key="AIzaSyD2e0XcC7ZzEsX3oMTzTT8roY62CjqLtt4")
+# Tu clave API
+API_KEY = "AIzaSyD2e0XcC7ZzEsX3oMTzTT8roY62CjqLtt4"
+API_URL = "https://api.openai.com/v1/chat/completions"
 
-# Inicializa el modelo Gemini 1.5 Pro
-model = genai.GenerativeModel("gemini-pro")
+app = Flask(_name_)
 
-# Cargar respuestas locales desde responses.json
-with open("responses.json", "r", encoding="utf-8") as f:
-    local_responses = json.load(f)
+def get_ai_response(user_message):
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {API_KEY}"
+    }
+    
+    data = {
+        "model": "gpt-3.5-turbo",
+        "messages": [{"role": "user", "content": user_message}]
+    }
+    
+    try:
+        response = requests.post(API_URL, headers=headers, json=data)
+        response.raise_for_status()
+        
+        response_data = response.json()
+        ai_response = response_data['choices'][0]['message']['content'].strip()
+        return ai_response
+    except requests.exceptions.RequestException as e:
+        print(f"Error al conectar con la API: {e}")
+        return "Lo siento, no pude comunicarme con el servicio de IA. Inténtalo de nuevo más tarde."
 
-app = Flask(__name__)
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-def buscar_respuesta_local(mensaje):
-    mensaje = mensaje.lower()
-    for categoria in local_responses:
-        for clave in local_responses[categoria]:
-            if clave in mensaje:
-                return local_responses[categoria][clave]
-    return None
+@app.route('/get_response', methods=['POST'])
+def get_response():
+    user_message = request.json.get('message')
+    if not user_message:
+        return jsonify({'response': 'Mensaje vacío.'})
+    
+    ai_response = get_ai_response(user_message)
+    return jsonify({'response': ai_response})
 
-@app.route("/", methods=["GET", "POST"])
-def chat():
-    response = None
-    if request.method == "POST":
-        user_input = request.form["user_input"]
-        try:
-            # Buscar primero en respuestas locales
-            local_response = buscar_respuesta_local(user_input)
-            if local_response:
-                response = local_response
-            else:
-                # Si no hay respuesta local, usar Gemini
-                chat_session = model.start_chat()
-                gemini_response = chat_session.send_message(user_input)
-                response = gemini_response.text
-        except Exception as e:
-            response = f"Error: {e}"
-    return render_template("index.html", response=response)
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)
