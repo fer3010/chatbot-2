@@ -46,10 +46,11 @@ def home():
                 error = f"Ocurrió un error: {e}"
                 # Intenta reiniciar la conversación si hay error
                 try:
-                    global chat
-                    chat = model.start_chat(history=[])
-                except:
-                    pass
+                    if model:
+                        global chat
+                        chat = model.start_chat(history=[])
+                except Exception as reset_error:
+                    print(f"Error al reiniciar chat: {reset_error}")
     
     return render_template("index.html", 
                          chat_history=historial_chat, 
