@@ -1,50 +1,56 @@
+import time
 import os
-from flask import Flask, render_template, request
 import google.generativeai as genai
+from flask import Flask, render_template, request
 
-# Cargar la clave API directamente en el código
-CLAVE_API = "AIzaSyC16OU-zOygGp74Q1kOxbxR1Uo1A68k39U"
-genai.configure(api_key=CLAVE_API)
+# Verifica ruta actual y contenido de templates
+print("📂 Ruta actual:", os.getcwd())
+print("📄 Archivos en ./templates:", os.listdir("templates"))
 
-MODELO_GEMINI = "gemini-1.5-flash-latest"
+# Clave API gratuita
+API_KEY = "AIzaSyAvL_TQGMbXzKHfEi_iiwJlnwzY6jUwux4"
+genai.configure(api_key=API_KEY)
 
-modelo = None
-conversacion = None
+MODEL_NAME = "gemini-1.5-flash-latest"
 
 try:
-    modelo = genai.GenerativeModel(MODELO_GEMINI)
-    conversacion = modelo.start_chat(history=[])
-    print(f"✅ Modelo cargado correctamente: {MODELO_GEMINI}")
-except Exception as error_modelo:
-    print(f"⚠️ Error al iniciar el modelo: {error_modelo}")
+    model = genai.GenerativeModel(MODEL_NAME)
+    chat = model.start_chat(history=[])
+    print(f"✅ Modelo cargado: {MODEL_NAME}")
+except Exception as e:
+    print(f"❌ Error al cargar el modelo: {e}")
+    chat = None
 
-# Respuestas predefinidas para optimizar la velocidad
-preset_responses = {
-    "hola": "¡Hola! ¿En qué puedo ayudarte hoy?",
-    "quien eres": "Soy un asistente conversacional creado por Yereexx.",
-    "adios": "¡Hasta pronto! Que tengas un buen día.",
-    "gracias": "Con gusto.",
-    "como estas": "Estoy funcionando perfectamente, gracias por preguntar. ¿Qué necesitas?"
+app = Flask(__name__)
+
+# Diccionario de respuestas locales
+local_responses = {
+    "hola": "¡Hola! ¿Cómo estás?",
+    "quién eres": "Soy el Chat Bot de Yereexx.",
+    "adiós": "¡Hasta luego!",
+    "gracias": "¡De nada!",
+    "cómo estás": "Estoy aquí para ayudarte, ¿en qué te puedo servir?"
 }
 
-aplicacion = Flask(__name__)
-
-@aplicacion.route("/", methods=["GET", "POST"])
-def interfaz():
-    mensaje_error = None
+@app.route("/", methods=["GET", "POST"])
+def home():
+    error = None
     if request.method == "POST":
-        entrada = request.form.get("user_input", "").strip().lower()
-        if entrada and conversacion:
+        user_input = request.form.get("user_input", "").strip().lower()
+        if user_input and chat:
             try:
-                # Comprobar si existe una respuesta predefinida
-                if entrada in preset_responses:
-                    response_text = preset_responses[entrada]
-                    conversacion.history.append({"role": "user", "parts": [{"text": entrada}]})
-                    conversacion.history.append({"role": "model", "parts": [{"text": response_text}]})
+                # Verifica si hay respuesta local
+                if user_input in local_responses:
+                    response_text = local_responses[user_input]
+                    chat.history.append({"role": "user", "parts": [{"text": user_input}]})
+                    chat.history.append({"role": "model", "parts": [{"text": response_text}]})
                 else:
-                    conversacion.send_message(entrada)
-            except Exception as fallo:
-                mensaje_error = f"⚠️ Ocurrió un error: {fallo}"
-    
-    # La variable se llama 'chat_history' para que el HTML la reconozca
-    return render_template("index.html", chat_history=conversacion.history if conversacion else [], error=mensaje_error)
+                    time.sleep(5)  # evita error 429 por cuota
+                    chat.send_message(user_input)
+            except Exception as e:
+                error = f"Ocurrió un error: {e}"
+    return render_template("index.html", chat_history=chat.history if chat else [], error=error)
+
+if __name__ == "__main__":
+    # Escucha en todas las interfaces para acceso desde red local
+    app.run(host="0.0.0.0", port=5000, debug=True)
