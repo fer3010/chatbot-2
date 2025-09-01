@@ -27,19 +27,12 @@
             {% endfor %}
         </div>
         
-        {% if error %}
-            <div class="alert error">{{ error }}</div>
-        {% endif %}
+        <div id="error-message" class="alert error" style="display: none;"></div>
 
         {% if modelo_disponible %}
         <div class="input-container">
-            <form action="/" method="post" id="chat-form">
-                <input type="text" name="user_input" placeholder="Escribe tu mensaje..." autocomplete="off" autofocus required>
-                <button type="submit">Enviar</button>
-            </form>
-            <form action="/limpiar" method="post" id="clear-form">
-                <button type="submit" class="clear-button">Limpiar Chat</button>
-            </form>
+            <input type="text" id="user-input" placeholder="Escribe tu mensaje..." autocomplete="off" autofocus>
+            <button id="send-button">Enviar</button>
         </div>
         {% else %}
             <div class="alert info">El modelo de IA no está disponible. Por favor, intenta más tarde.</div>
@@ -47,17 +40,89 @@
     </div>
 
     <script>
-        // Mantiene el scroll en la parte inferior del chat
-        var chatBox = document.getElementById("chat-box");
-        chatBox.scrollTop = chatBox.scrollHeight;
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const errorMessageDiv = document.getElementById('error-message');
 
-        // Limpia el formulario después de enviar un mensaje para no volver a enviarlo al recargar
-        window.addEventListener('load', function() {
-            var inputField = document.querySelector('input[name="user_input"]');
-            if (inputField) {
-                inputField.value = '';
+        // Función para desplazar el chat hasta el final
+        function scrollToBottom() {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Función para mostrar mensajes en el chat
+        function addMessage(text, isUser) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.classList.add(isUser ? 'user-message' : 'bot-message');
+            messageDiv.innerHTML = `<p>${text}</p>`;
+            chatBox.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        // Manejar el envío de mensajes
+        async function sendMessage() {
+            const userText = userInput.value.trim();
+            if (!userText) return;
+
+            // Limpiar input y añadir el mensaje del usuario al chat
+            userInput.value = '';
+            addMessage(userText, true);
+
+            // Mostrar un mensaje de carga del bot
+            const loadingDiv = document.createElement('div');
+            loadingDiv.classList.add('message', 'bot-message', 'loading-message');
+            loadingDiv.innerHTML = '<p>...</p>';
+            chatBox.appendChild(loadingDiv);
+            scrollToBottom();
+
+            // Deshabilitar la entrada y el botón mientras se procesa la respuesta
+            userInput.disabled = true;
+            sendButton.disabled = true;
+
+            try {
+                // Enviar la petición al servidor sin recargar la página
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ user_input: userText })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error en el servidor. Intenta de nuevo más tarde.');
+                }
+                
+                const data = await response.json();
+                
+                // Eliminar el mensaje de carga y añadir la respuesta del bot
+                chatBox.removeChild(loadingDiv);
+                addMessage(data.response, false);
+
+            } catch (error) {
+                chatBox.removeChild(loadingDiv);
+                errorMessageDiv.textContent = 'Ocurrió un error. Por favor, limpia el chat y vuelve a intentarlo.';
+                errorMessageDiv.style.display = 'block';
+                console.error('Error:', error);
+            } finally {
+                // Habilitar la entrada y el botón
+                userInput.disabled = false;
+                sendButton.disabled = false;
+                userInput.focus();
+            }
+        }
+
+        // Escuchar eventos de clic en el botón de enviar y Enter en el input
+        sendButton.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
             }
         });
+
+        // Desplazar el chat al final al cargar la página
+        window.onload = scrollToBottom;
     </script>
 </body>
 </html>
