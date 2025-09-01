@@ -1,37 +1,41 @@
+
 import os
-import google.generativeai as genai
+import time
 from flask import Flask, render_template, request
+import google.generativeai as genai
 
-# Cargar la clave API desde una variable de entorno por seguridad
-API_KEY = os.environ.get("AIzaSyC16OU-zOygGp74Q1kOxbxR1Uo1A68k39U")
-genai.configure(api_key=API_KEY)
 
-MODEL_ID = "gemini-1.5-flash-latest"
+CLAVE_API = "AIzaSyC16OU-zOygGp74Q1kOxbxR1Uo1A68k39U"
+MODELO_GEMINI = "gemini-1.5-flash-latest"
+genai.configure(apikey=CLAVEAPI)
+
+
+modelo = None
+conversacion = None
 
 try:
-    chatbot_model = genai.GenerativeModel(MODEL_ID)
-    chatbot_session = chatbot_model.start_chat(history=[])
-    print(f"✅ Modelo cargado: {MODEL_ID}")
-except Exception as e:
-    print(f"❌ Error al cargar el modelo: {e}")
-    chatbot_session = None
+    modelo = genai.GenerativeModel(MODELO_GEMINI)
+    conversacion = modelo.start_chat(history=[])
+    print(f"✅ Modelo cargado correctamente: {MODELO_GEMINI}")
+except Exception as error_modelo:
+    print(f"⚠️ Error al iniciar el modelo: {error_modelo}")
 
-app = Flask(__name__)
 
-@app.route("/", methods=["GET", "POST"])
-def main_page():
-    error_message = None
+print("📁 Carpeta actual:", os.getcwd())
+print("📂 Archivos en 'templates':", os.listdir("templates"))
+
+
+aplicacion = Flask(name)
+
+@aplicacion.route("/", methods=["GET", "POST"])
+def interfaz():
+    mensaje_error = None
     if request.method == "POST":
-        user_message = request.form.get("user_input", "").strip().lower()
-        if user_message and chatbot_session:
+        entrada = request.form.get("user_input", "").strip()
+        if entrada and conversacion:
             try:
-                if user_message in preset_responses:
-                    response_text = preset_responses[user_message]
-                    chatbot_session.history.append({"role": "user", "parts": [{"text": user_message}]})
-                    chatbot_session.history.append({"role": "model", "parts": [{"text": response_text}]})
-                else:
-                    chatbot_session.send_message(user_message)
-            except Exception as e:
-                error_message = f"Ocurrió un error: {e}"
-    
-    return render_template("index.html", chat_history=chatbot_session.history if chatbot_session else [], error=error_message)
+                time.sleep(5)  # ⏳ Pausa para evitar saturación
+                conversacion.send_message(entrada)
+            except Exception as fallo:
+                mensaje_error = f"⚠️ Ocurrió un error: {fallo}"
+    return rendertemplate("index.html", chathistory=conversacion.history if conversacion else [], error=mensaje_error)
