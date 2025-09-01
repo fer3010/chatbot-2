@@ -7,7 +7,7 @@ import google.generativeai as genai
 
 CLAVE_API = "AIzaSyC16OU-zOygGp74Q1kOxbxR1Uo1A68k39U"
 MODELO_GEMINI = "gemini-1.5-flash-latest"
-genai.configure(apikey=CLAVE_API)
+genai.configure(api_key=CLAVE_API)
 
 
 modelo = None
