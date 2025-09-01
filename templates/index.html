@@ -1,27 +1,37 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Gemini Chat</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot de Yereexx</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Gemini Chat</h1>
-    <input type="text" id="userMessage" placeholder="Escribe tu mensaje">
-    <button onclick="sendMessage()">Enviar</button>
-    <p id="response"></p>
 
-    <script>
-        function sendMessage() {
-            const message = document.getElementById("userMessage").value;
-            fetch("/get_response", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message })
-            })
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById("response").innerText = data.response;
-            });
-        }
-    </script>
+    <div class="container">
+        <header>
+            <h1>Chatbot de FMRT</h1>
+        </header>
+
+        <main class="chat-area" id="chat-area">
+            {% for entry in chat_history %}
+                {% if entry.role == 'user' %}
+                    <div class="message user-message">{{ entry.parts[0].text }}</div>
+                {% else %}
+                    <div class="message bot-message">{{ entry.parts[0].text }}</div>
+                {% endif %}
+            {% endfor %}
+        </main>
+
+        {% if error %}
+            <div class="error-message">{{ error }}</div>
+        {% endif %}
+
+        <form class="input-form" method="post">
+            <input type="text" name="user_input" id="user_input" placeholder="Escribe tu mensaje..." required>
+            <button type="submit">Enviar</button>
+        </form>
+    </div>
+
 </body>
 </html>
