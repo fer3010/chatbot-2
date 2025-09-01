@@ -2,8 +2,8 @@ import os
 from flask import Flask, render_template, request
 import google.generativeai as genai
 
-# Cargar la clave API desde una variable de entorno por seguridad
-CLAVE_API = os.environ.get("API_KEY")
+# Cargar la clave API directamente en el código
+CLAVE_API = "AIzaSyC16OU-zOygGp74Q1kOxbxR1Uo1A68k39U"
 genai.configure(api_key=CLAVE_API)
 
 MODELO_GEMINI = "gemini-1.5-flash-latest"
