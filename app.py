@@ -7,7 +7,7 @@ import google.generativeai as genai
 
 CLAVE_API = "AIzaSyC16OU-zOygGp74Q1kOxbxR1Uo1A68k39U"
 MODELO_GEMINI = "gemini-1.5-flash-latest"
-genai.configure(apikey=CLAVEAPI)
+genai.configure(apikey=CLAVE_API)
 
 
 modelo = None
@@ -25,7 +25,7 @@ print("📁 Carpeta actual:", os.getcwd())
 print("📂 Archivos en 'templates':", os.listdir("templates"))
 
 
-aplicacion = Flask(name)
+aplicacion = Flask(__name__)
 
 @aplicacion.route("/", methods=["GET", "POST"])
 def interfaz():
@@ -38,4 +38,4 @@ def interfaz():
                 conversacion.send_message(entrada)
             except Exception as fallo:
                 mensaje_error = f"⚠️ Ocurrió un error: {fallo}"
-    return rendertemplate("index.html", chathistory=conversacion.history if conversacion else [], error=mensaje_error)
+    return render_template("index.html", chathistory=conversacion.history if conversacion else [], error=mensaje_error)
