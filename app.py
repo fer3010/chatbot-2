@@ -8,6 +8,7 @@ print("📂 Ruta actual:", os.getcwd())
 print("📄 Archivos en ./templates:", os.listdir("templates"))
 
 # Clave API gratuita
+# NOTA: Por seguridad, en un entorno de producción, la clave API no debería estar codificada
 API_KEY = "AIzaSyAvL_TQGMbXzKHfEi_iiwJlnwzY6jUwux4"
 genai.configure(api_key=API_KEY)
 
@@ -53,6 +54,7 @@ def obtener_respuesta_local(entrada_usuario):
 
 @app.route("/", methods=["GET", "POST"])
 def home():
+    global chat  # La corrección está aquí: la declaración global va al inicio de la función
     error = None
     historial_chat = chat.history if chat else []
     
@@ -82,15 +84,14 @@ def home():
                 error = f"Ocurrió un error: {e}"
                 # Intenta reiniciar la conversación si hay error
                 try:
-                    global chat
                     chat = model.start_chat(history=[])
                 except:
                     pass
     
     return render_template("index.html", 
-                         chat_history=historial_chat, 
-                         error=error,
-                         modelo_disponible=chat is not None)
+                           chat_history=historial_chat, 
+                           error=error,
+                           modelo_disponible=chat is not None)
 
 @app.route("/limpiar", methods=["POST"])
 def limpiar_chat():
