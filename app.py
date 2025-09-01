@@ -1,14 +1,12 @@
-
 import os
-import time
 from flask import Flask, render_template, request
 import google.generativeai as genai
 
-
-CLAVE_API = "AIzaSyC16OU-zOygGp74Q1kOxbxR1Uo1A68k39U"
-MODELO_GEMINI = "gemini-1.5-flash-latest"
+# Cargar la clave API desde una variable de entorno por seguridad
+CLAVE_API = os.environ.get("API_KEY")
 genai.configure(api_key=CLAVE_API)
 
+MODELO_GEMINI = "gemini-1.5-flash-latest"
 
 modelo = None
 conversacion = None
@@ -20,10 +18,14 @@ try:
 except Exception as error_modelo:
     print(f"⚠️ Error al iniciar el modelo: {error_modelo}")
 
-
-print("📁 Carpeta actual:", os.getcwd())
-print("📂 Archivos en 'templates':", os.listdir("templates"))
-
+# Respuestas predefinidas para optimizar la velocidad
+preset_responses = {
+    "hola": "¡Hola! ¿En qué puedo ayudarte hoy?",
+    "quien eres": "Soy un asistente conversacional creado por Yereexx.",
+    "adios": "¡Hasta pronto! Que tengas un buen día.",
+    "gracias": "Con gusto.",
+    "como estas": "Estoy funcionando perfectamente, gracias por preguntar. ¿Qué necesitas?"
+}
 
 aplicacion = Flask(__name__)
 
@@ -31,11 +33,18 @@ aplicacion = Flask(__name__)
 def interfaz():
     mensaje_error = None
     if request.method == "POST":
-        entrada = request.form.get("user_input", "").strip()
+        entrada = request.form.get("user_input", "").strip().lower()
         if entrada and conversacion:
             try:
-                time.sleep(5)  # ⏳ Pausa para evitar saturación
-                conversacion.send_message(entrada)
+                # Comprobar si existe una respuesta predefinida
+                if entrada in preset_responses:
+                    response_text = preset_responses[entrada]
+                    conversacion.history.append({"role": "user", "parts": [{"text": entrada}]})
+                    conversacion.history.append({"role": "model", "parts": [{"text": response_text}]})
+                else:
+                    conversacion.send_message(entrada)
             except Exception as fallo:
                 mensaje_error = f"⚠️ Ocurrió un error: {fallo}"
-    return render_template("index.html", chathistory=conversacion.history if conversacion else [], error=mensaje_error)
+    
+    # La variable se llama 'chat_history' para que el HTML la reconozca
+    return render_template("index.html", chat_history=conversacion.history if conversacion else [], error=mensaje_error)
