@@ -3,35 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatbot de Yereexx</title>
-    <link rel="stylesheet" href="style.css">
+    <title>ChatBot Yereexx - Dark</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-    <div class="container">
-        <header>
-            <h1>Chatbot de FMRT</h1>
-        </header>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2>Asistente Virtual</h2>
+        </div>
 
-        <main class="chat-area" id="chat-area">
+        <div class="chat-box" id="chat-box">
             {% for entry in chat_history %}
                 {% if entry.role == 'user' %}
-                    <div class="message user-message">{{ entry.parts[0].text }}</div>
+                    <div class="message user-message">
+                        <p>{{ entry.parts[0].text }}</p>
+                    </div>
                 {% else %}
-                    <div class="message bot-message">{{ entry.parts[0].text }}</div>
+                    <div class="message bot-message">
+                        <p>{{ entry.parts[0].text }}</p>
+                    </div>
                 {% endif %}
             {% endfor %}
-        </main>
-
+        </div>
+        
         {% if error %}
-            <div class="error-message">{{ error }}</div>
+            <div class="alert error">{{ error }}</div>
         {% endif %}
 
-        <form class="input-form" method="post">
-            <input type="text" name="user_input" id="user_input" placeholder="Escribe tu mensaje..." required>
-            <button type="submit">Enviar</button>
-        </form>
+        {% if modelo_disponible %}
+        <div class="input-container">
+            <form action="/" method="post" id="chat-form">
+                <input type="text" name="user_input" placeholder="Escribe tu mensaje..." autocomplete="off" autofocus required>
+                <button type="submit">Enviar</button>
+            </form>
+            <form action="/limpiar" method="post" id="clear-form">
+                <button type="submit" class="clear-button">Limpiar Chat</button>
+            </form>
+        </div>
+        {% else %}
+            <div class="alert info">El modelo de IA no está disponible. Por favor, intenta más tarde.</div>
+        {% endif %}
     </div>
 
+    <script>
+        // Mantiene el scroll en la parte inferior del chat
+        var chatBox = document.getElementById("chat-box");
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        // Limpia el formulario después de enviar un mensaje para no volver a enviarlo al recargar
+        window.addEventListener('load', function() {
+            var inputField = document.querySelector('input[name="user_input"]');
+            if (inputField) {
+                inputField.value = '';
+            }
+        });
+    </script>
 </body>
 </html>

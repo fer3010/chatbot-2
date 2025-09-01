@@ -1,139 +1,139 @@
-:root {
-    --dark-background: #1A1A1A;
-    --chat-container-bg: #2C2C2C;
-    --user-message-bg: #004D99;
-    --bot-message-bg: #4A4A4A;
-    --input-bg: #333;
-    --text-color: #E0E0E0;
-    --blue-accent: #007BFF;
-    --border-radius: 12px;
-    --font-family: 'Inter', sans-serif;
-}
-
 body {
-    font-family: var(--font-family);
-    background-color: var(--dark-background);
-    color: var(--text-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #1a1a1a;
+    color: #e0e0e0;
     margin: 0;
     padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    height: 100vh;
 }
 
-.container {
+.chat-container {
     width: 90%;
-    max-width: 700px;
-    background-color: var(--chat-container-bg);
-    border-radius: var(--border-radius);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    max-width: 600px;
+    height: 80vh;
+    background-color: #2b2b2b;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    height: 80vh;
+    transition: all 0.3s ease;
 }
 
-header {
-    background-color: #000;
+.chat-header {
+    background-color: #121212;
+    color: #00ffaa;
     padding: 20px;
     text-align: center;
-    border-bottom: 2px solid var(--blue-accent);
+    font-size: 1.5em;
+    border-bottom: 2px solid #00ffaa;
 }
 
-h1 {
-    margin: 0;
-    font-size: 1.8rem;
-    color: var(--blue-accent);
-    font-weight: 700;
-}
-
-.chat-area {
+.chat-box {
     flex-grow: 1;
     padding: 20px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 15px;
-    scroll-behavior: smooth;
 }
 
 .message {
-    max-width: 80%;
     padding: 12px 18px;
-    border-radius: var(--border-radius);
+    border-radius: 20px;
+    max-width: 80%;
     word-wrap: break-word;
-    line-height: 1.6;
     animation: fadeIn 0.5s ease-in-out;
 }
 
 .user-message {
+    background-color: #444444;
+    color: #ffffff;
     align-self: flex-end;
-    background-color: var(--user-message-bg);
 }
 
 .bot-message {
+    background-color: #004d33;
+    color: #ffffff;
     align-self: flex-start;
-    background-color: var(--bot-message-bg);
-    border: 1px solid var(--blue-accent);
 }
 
-.input-form {
+.input-container {
+    padding: 15px;
+    border-top: 2px solid #00ffaa;
     display: flex;
-    padding: 20px;
     gap: 10px;
-    border-top: 1px solid #444;
+    flex-direction: column;
 }
 
-#user_input {
+.input-container form {
+    display: flex;
+    width: 100%;
+    gap: 10px;
+}
+
+.input-container input[type="text"] {
     flex-grow: 1;
     padding: 12px;
-    border: 1px solid #444;
-    border-radius: var(--border-radius);
-    background-color: var(--input-bg);
-    color: var(--text-color);
-    font-family: var(--font-family);
-    font-size: 1rem;
-}
-
-#user_input:focus {
-    outline: none;
-    border-color: var(--blue-accent);
-}
-
-button {
-    padding: 12px 20px;
     border: none;
-    border-radius: var(--border-radius);
-    background-color: var(--blue-accent);
-    color: white;
-    font-family: var(--font-family);
-    font-size: 1rem;
+    background-color: #444444;
+    color: #ffffff;
+    border-radius: 25px;
+    outline: none;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+.input-container input[type="text"]:focus {
+    background-color: #555555;
+}
+
+.input-container button {
+    padding: 12px 25px;
+    border: none;
+    background-color: #00ffaa;
+    color: #121212;
+    border-radius: 25px;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.1s ease;
+    font-size: 1em;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
 }
 
-button:hover {
-    background-color: #0069D9;
+.input-container button:hover {
+    background-color: #00e699;
 }
 
-button:active {
-    transform: scale(0.98);
+.clear-button {
+    background-color: #ff3366 !important;
 }
 
-.error-message {
-    color: #FF5A5A;
+.clear-button:hover {
+    background-color: #e6005c !important;
+}
+
+.alert {
+    padding: 10px;
+    margin: 10px 20px;
+    border-radius: 5px;
     text-align: center;
-    margin-top: 10px;
+    font-weight: bold;
+}
+
+.alert.error {
+    background-color: #ff6666;
+    color: #660000;
+}
+
+.alert.info {
+    background-color: #99e6ff;
+    color: #004d66;
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
