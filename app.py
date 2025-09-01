@@ -1,7 +1,7 @@
 import time
 import os
 import google.generativeai as genai
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 
 # Verifica ruta actual y contenido de templates
 print("📂 Ruta actual:", os.getcwd())
@@ -24,38 +24,41 @@ except Exception as e:
 
 app = Flask(__name__)
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/", methods=["GET"])
 def home():
     global chat
-    error = None
     historial_chat = chat.history if chat else []
-    
-    if request.method == "POST":
-        user_input = request.form.get("user_input", "").strip()
-        
-        if not user_input:
-            error = "Por favor, escribe un mensaje."
-        elif not chat:
-            error = "El modelo no está disponible. Intenta recargar la página."
-        else:
-            try:
-                # Todas las peticiones se envían directamente al modelo de IA
-                time.sleep(2)
-                response = chat.send_message(user_input)
-                response_text = response.text
-                
-            except Exception as e:
-                error = f"Ocurrió un error: {e}"
-                # Intenta reiniciar la conversación si hay error
-                try:
-                    chat = model.start_chat(history=[])
-                except:
-                    pass
-    
     return render_template("index.html", 
                            chat_history=historial_chat, 
-                           error=error,
+                           error=None,
                            modelo_disponible=chat is not None)
+
+@app.route("/chat", methods=["POST"])
+def get_chat_response():
+    global chat
+    if not chat:
+        return jsonify({"error": "El modelo no está disponible."}), 503
+
+    data = request.json
+    user_input = data.get("user_input", "").strip()
+    
+    if not user_input:
+        return jsonify({"error": "Por favor, escribe un mensaje."}), 400
+
+    try:
+        time.sleep(1) # Pequeña pausa para evitar límites de tasa
+        response = chat.send_message(user_input)
+        response_text = response.text
+        return jsonify({"response": response_text})
+
+    except Exception as e:
+        print(f"Ocurrió un error en el API: {e}")
+        try:
+            # Intenta reiniciar la conversación si hay error
+            chat = model.start_chat(history=[])
+        except Exception as reset_e:
+            print(f"Error al reiniciar el chat: {reset_e}")
+        return jsonify({"error": "Ocurrió un error. El chat se ha reiniciado."}), 500
 
 @app.route("/limpiar", methods=["POST"])
 def limpiar_chat():
@@ -64,11 +67,10 @@ def limpiar_chat():
     if model and chat:
         try:
             chat = model.start_chat(history=[])
-            return "Chat limpiado correctamente"
+            return "Chat limpiado correctamente", 200
         except Exception as e:
-            return f"Error al limpiar el chat: {e}"
-    return "No se pudo limpiar el chat"
+            return f"Error al limpiar el chat: {e}", 500
+    return "No se pudo limpiar el chat", 500
 
 if __name__ == "__main__":
-    # Escucha en todas las interfaces para acceso desde red local
     app.run(host="0.0.0.0", port=5000, debug=True)
