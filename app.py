@@ -2,6 +2,7 @@ import time
 import os
 import google.generativeai as genai
 from flask import Flask, render_template, request, jsonify
+from dotenv import load_dotenv
 
 # Verifica ruta actual y contenido de templates
 print("📂 Ruta actual:", os.getcwd())
@@ -9,7 +10,9 @@ print("📄 Archivos en ./templates:", os.listdir("templates"))
 
 # Clave API gratuita
 # NOTA: Por seguridad, en un entorno de producción, la clave API no debería estar codificada
-API_KEY = "AIzaSyAvL_TQGMbXzKHfEi_iiwJlnwzY6jUwux4"
+API_KEY = os.getenv("API_KEY")
+if not API_KEY:
+    print("❌ La clave API no está configurada. Por favor, establece la variable de entorno API_KEY.")
 genai.configure(api_key=API_KEY)
 
 MODEL_NAME = "gemini-1.5-flash-latest"
